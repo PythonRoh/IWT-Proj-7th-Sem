@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Community Event Scheduler</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", "Quicksand", sans-serif;
+      }
+
+      body {
+        background: url("https://images.pexels.com/photos/4319747/pexels-photo-4319747.jpeg?auto=compress&cs=tinysrgb&w=1920")
+          no-repeat center center / cover;
+        color: #fef6f0; /* Warm white tone for readability over sunset background */
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        background-attachment: fixed;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4); /* Soft readability shadow */
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      header h1 {
+        font-size: 2.3rem;
+        margin-bottom: 10px;
+        color: #ffffff; /* Slightly brighter for title emphasis */
+      }
+
+      .filter-section {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Soft glassy style for Add/Edit Event modal inputs */
+      #formModal input[type="text"],
+      #formModal input[type="date"],
+      #formModal textarea {
+        width: 90%;
+        margin: 10px 0;
+        padding: 12px 15px;
+        border: 1.5px solid rgba(37, 117, 252, 0.4);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        color: #333;
+        font-size: 1rem;
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+      }
+
+      /* Placeholder style */
+      #formModal input::placeholder,
+      #formModal textarea::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+      }
+
+      /* Hover & focus effect */
+      #formModal input:focus,
+      #formModal textarea:focus {
+        border-color: #2575fc;
+        background: rgba(255, 255, 255, 0.35);
+        box-shadow: 0 0 8px rgba(37, 117, 252, 0.3);
+        outline: none;
+      }
+
+      /* Optional: textarea improvement */
+      #formModal textarea {
+        resize: none;
+        min-height: 80px;
+      }
+
+      textarea {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        outline: none;
+        background: rgba(255, 255, 255, 0.8);
+        color: #333;
+        font-size: 1rem;
+      }
+
+      /* Modern button styling with warm coral accents */
+      button {
+        background: rgba(255, 255, 255, 0.9);
+        color: #ff867c; /* Coral tone inspired by sunset */
+        border: none;
+        border-radius: 6px;
+        padding: 10px 18px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-shadow: none;
+      }
+      button:hover {
+        background: rgba(255, 179, 167, 0.9);
+        color: #fff;
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(255, 179, 167, 0.4);
+      }
+
+      .event-list {
+        margin-top: 30px;
+        width: 100%;
+        max-width: 800px;
+        display: grid;
+        gap: 20px;
+      }
+
+      .event-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        transition: 0.3s;
+      }
+      .event-card:hover {
+        transform: scale(1.03);
+        background: rgba(255, 255, 255, 0.18);
+      }
+      .event-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 5px;
+        color: #ffffff;
+      }
+      .event-card p {
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+        color: #fef6f0;
+      }
+      .event-card .event-date {
+        font-weight: 600;
+        color: #ffd59a; /* Warm sunset gold tone */
+      }
+
+      /* Modal */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+      }
+      .modal-content {
+        background: #fff;
+        color: #333;
+        border-radius: 10px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        position: relative;
+        animation: pop 0.3s ease;
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0.7);
+        }
+        to {
+          transform: scale(1);
+        }
+      }
+      .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 20px;
+        cursor: pointer;
+        color: #2575fc;
+      }
+
+      input {
+        border-style: solid;
+        border-color: #333;
+      }
+
+      footer {
+        margin-top: auto;
+        padding: 15px;
+        text-align: center;
+        color: #fef6f0;
+        opacity: 0.9;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Light, soft, and modern input styling */
+      input[type="text"],
+      input[type="date"] {
+        padding: 12px 15px;
+        width: 230px;
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(6px);
+      }
+
+      /* Placeholder color */
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Hover and focus effects */
+      input:hover,
+      input:focus {
+        border-color: #ffffff;
+        background: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+
+      @media (max-width: 600px) {
+        .filter-section {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Community Event Scheduler</h1>
+      <p>Manage, Filter, and Schedule Local Events</p>
+    </header>
+
+    <div class="filter-section">
+      <input type="text" id="searchInput" placeholder="Search event name..." />
+      <input type="date" id="dateFilter" />
+      <button onclick="filterEvents()">Filter</button>
+      <button onclick="resetFilter()">Reset</button>
+      <button onclick="openCreateModal()">➕ Add Event</button>
+    </div>
+
+    <div class="event-list" id="eventList"></div>
+
+    <!-- Event Detail Modal -->
+    <div class="modal" id="eventModal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalDate"></p>
+        <p id="modalDesc"></p>
+        <p id="modalVenue"></p>
+        <button id="editBtn">✏ Edit</button>
+        <button id="deleteBtn">🗑 Delete</button>
+      </div>
+    </div>
+
+    <!-- Create / Edit Modal -->
+    <div class="modal" id="formModal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeFormModal()">&times;</span>
+        <h2 id="formTitle">Add New Event</h2>
+        <input
+          type="text"
+          id="eventName"
+          placeholder="Event Name"
+        /><br /><br />
+        <input type="date" id="eventDate" /><br /><br />
+        <input type="text" id="eventVenue" placeholder="Venue" /><br /><br />
+        <textarea id="eventDesc" placeholder="Description" rows="3"></textarea
+        ><br /><br />
+        <button onclick="saveEvent()">Save</button>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2025 Community Connect | Designed with ❤ for local unity</p>
+    </footer>
+
+    <script>
+      let events = JSON.parse(localStorage.getItem("events")) || [
+        {
+          id: Date.now(),
+          name: "Tree Plantation Drive",
+          date: "2025-11-10",
+          desc: "Join our eco-initiative to plant trees!",
+          venue: "Central Park",
+        },
+        {
+          id: Date.now() + 1,
+          name: "Blood Donation Camp",
+          date: "2025-11-03",
+          desc: "Donate blood and save lives!",
+          venue: "Community Hall",
+        },
+      ];
+
+      const eventList = document.getElementById("eventList");
+      const modal = document.getElementById("eventModal");
+      const formModal = document.getElementById("formModal");
+      const searchInput = document.getElementById("searchInput");
+      const dateFilter = document.getElementById("dateFilter");
+
+      let selectedEventId = null;
+      let isEditing = false;
+
+      function saveToStorage() {
+        localStorage.setItem("events", JSON.stringify(events));
+      }
+
+      function displayEvents(list) {
+        eventList.innerHTML = "";
+        if (list.length === 0) {
+          eventList.innerHTML =
+            "<p style='text-align:center;color:#fff;'>No events found!</p>";
+          return;
+        }
+        list.forEach((e) => {
+          const div = document.createElement("div");
+          div.classList.add("event-card");
+          div.innerHTML = `
+            <h3>${e.name}</h3>
+            <p class="event-date">📅 ${e.date}</p>
+            <p>${e.venue}</p>
+            <button onclick="openModal(${e.id})">View Details</button>
+        `;
+          eventList.appendChild(div);
+        });
+      }
+
+      function openModal(id) {
+        const e = events.find((ev) => ev.id === id);
+        if (!e) return;
+        selectedEventId = id;
+        document.getElementById("modalTitle").innerText = e.name;
+        document.getElementById("modalDate").innerText = "Date: " + e.date;
+        document.getElementById("modalDesc").innerText = e.desc;
+        document.getElementById("modalVenue").innerText = "Venue: " + e.venue;
+        modal.style.display = "flex";
+        document.getElementById("editBtn").onclick = () => openEditModal(id);
+        document.getElementById("deleteBtn").onclick = () => deleteEvent(id);
+      }
+      function closeModal() {
+        modal.style.display = "none";
+      }
+
+      function openCreateModal() {
+        isEditing = false;
+        selectedEventId = null;
+        document.getElementById("formTitle").innerText = "Add New Event";
+        document.getElementById("eventName").value = "";
+        document.getElementById("eventDate").value = "";
+        document.getElementById("eventVenue").value = "";
+        document.getElementById("eventDesc").value = "";
+        formModal.style.display = "flex";
+      }
+      function openEditModal(id) {
+        isEditing = true;
+        const e = events.find((ev) => ev.id === id);
+        if (!e) return;
+        document.getElementById("formTitle").innerText = "Edit Event";
+        document.getElementById("eventName").value = e.name;
+        document.getElementById("eventDate").value = e.date;
+        document.getElementById("eventVenue").value = e.venue;
+        document.getElementById("eventDesc").value = e.desc;
+        closeModal();
+        formModal.style.display = "flex";
+      }
+      function closeFormModal() {
+        formModal.style.display = "none";
+      }
+
+      function saveEvent() {
+        const name = document.getElementById("eventName").value.trim();
+        const date = document.getElementById("eventDate").value;
+        const venue = document.getElementById("eventVenue").value.trim();
+        const desc = document.getElementById("eventDesc").value.trim();
+
+        if (!name || !date || !venue) {
+          alert("Please fill all fields!");
+          return;
+        }
+
+        if (isEditing) {
+          const idx = events.findIndex((e) => e.id === selectedEventId);
+          if (idx !== -1) {
+            events[idx] = { ...events[idx], name, date, venue, desc };
+          }
+        } else {
+          const newEvent = { id: Date.now(), name, date, venue, desc };
+          events.push(newEvent);
+        }
+
+        saveToStorage();
+        displayEvents(events);
+        closeFormModal();
+      }
+
+      function deleteEvent(id) {
+        if (confirm("Are you sure you want to delete this event?")) {
+          events = events.filter((e) => e.id !== id);
+          saveToStorage();
+          displayEvents(events);
+          closeModal();
+        }
+      }
+
+      function filterEvents() {
+        const searchVal = searchInput.value.toLowerCase();
+        const dateVal = dateFilter.value;
+        const filtered = events.filter(
+          (e) =>
+            e.name.toLowerCase().includes(searchVal) &&
+            (dateVal === "" || e.date === dateVal)
+        );
+        displayEvents(filtered);
+      }
+      function resetFilter() {
+        searchInput.value = "";
+        dateFilter.value = "";
+        displayEvents(events);
+      }
+
+      window.onclick = function (e) {
+        if (e.target === modal) closeModal();
+        if (e.target === formModal) closeFormModal();
+      };
+
+      displayEvents(events);
+    </script>
+  </body>
+</html>
